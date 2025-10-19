@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>웹소설 노트 — 체크리스트 (Ultimate)</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Dongle:wght@300;400;700&family=Gamja+Flower&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-light: #fffdf8;
+    --page-bg-light: #fffefc;
+    --muted-light: #7a746f;
+    --ink-light: #2e2b29;
+    --accent: #c9b89a;
+    --start: #4b2e16;
+    --start-hover: #6a3e22;
+    --example-bg: #f8f3e9;
+    --shadow: 0 8px 28px rgba(46,43,41,0.08);
+
+    --bg-dark: #221b18;
+    --page-bg-dark: #2b211d;
+    --muted-dark: #cfc6bf;
+    --ink-dark: #f6efe9;
+    --example-bg-dark: #3a2e2a;
+    --shadow-dark: 0 8px 28px rgba(0,0,0,0.6);
+
+    --transition: 0.32s ease;
+  }
+
+  /* base styling uses CSS variables switched by [data-theme] attribute */
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family: "Dongle", "Pretendard", "Noto Serif KR", "Gowun Dodum", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: var(--bg);
+    color: var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    transition: background var(--transition), color var(--transition), font-family var(--transition);
+  }
+
+  /* Light theme defaults */
+  body[data-theme="light"]{
+    --bg: var(--bg-light);
+    --page-bg: var(--page-bg-light);
+    --muted: var(--muted-light);
+    --ink: var(--ink-light);
+    --example-bg-var: var(--example-bg);
+    --shadow-var: var(--shadow);
+    font-family: "Dongle", "Pretendard", "Noto Serif KR", "Gowun Dodum", sans-serif;
+  }
+
+  /* Dark theme overrides */
+  body[data-theme="dark"]{
+    --bg: var(--bg-dark);
+    --page-bg: var(--page-bg-dark);
+    --muted: var(--muted-dark);
+    --ink: var(--ink-dark);
+    --example-bg-var: var(--example-bg-dark);
+    --shadow-var: var(--shadow-dark);
+    font-family: "Gamja Flower", "Dongle", "Pretendard", "Noto Serif KR", "Gowun Dodum", sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  .wrap{
+    width:100%;
+    max-width:1100px;
+    background:var(--page-bg);
+    border-radius:16px;
+    box-shadow:var(--shadow-var);
+    padding:24px;
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:20px;
+    transition: box-shadow var(--transition), background var(--transition);
+  }
+
+  /* LEFT: menu */
+  .left{
+    padding:16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(250,248,245,0.02));
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,0.04);
+    min-height:520px;
+  }
+  h1{font-family:"Gowun Dodum"; font-size:1.28rem; margin:0 0 10px;}
+  .subtitle{color:var(--muted); font-size:0.9rem; margin-bottom:14px;}
+  .start-btn{
+    display:block;
+    width:100%;
+    padding:12px 14px;
+    background:var(--start);
+    color:#fff;
+    border-radius:10px;
+    border:0;
+    font-style:italic;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(75,46,22,0.12);
+    text-align:center;
+  }
+  .start-btn:hover{ background:var(--start-hover); }
+  .section{margin-top:18px;}
+  .password-row{display:flex; gap:8px; margin-top:10px;}
+  .password-row input{flex:1; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:var(--ink);}
+  .password-row button{padding:10px 14px; border-radius:8px; cursor:pointer; border:0; background:var(--start); color:#fff;}
+  .novel-list{margin-top:12px; display:flex; flex-direction:column; gap:10px;}
+  .novel-item{padding:12px; border-radius:11px; cursor:pointer; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); border:1px solid rgba(0,0,0,0.04); box-shadow: 0 6px 18px rgba(0,0,0,0.04); display:flex; justify-content:space-between; align-items:center;}
+  .novel-item:hover{transform:translateY(-4px); transition:transform .18s ease;}
+  .small{font-size:0.84rem; color:var(--muted); margin-top:8px;}
+  /* RIGHT: content */
+  .right{padding:18px;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:18px; border-radius:12px; border:1px solid rgba(0,0,0,0.04); box-shadow:var(--shadow-var);}
+  .top-row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .controls{display:flex; gap:10px; align-items:center;}
+  input[type="number"], input[type="text"], input.author {padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06); width:120px; font-family:inherit; background:transparent; color:var(--ink);}
+  .tiny{font-size:0.9rem;color:var(--muted);}
+  .result-list{margin-top:16px; display:flex; flex-direction:column; gap:12px; max-height:56vh; overflow:auto; padding-right:6px;}
+  .record{background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:10px; padding:12px; border:1px solid rgba(0,0,0,0.04); box-shadow:0 6px 18px rgba(0,0,0,0.03);}
+  .rec-top{display:flex; align-items:center; justify-content:space-between;}
+  .rec-left{display:flex; gap:10px; align-items:center; flex-direction:column; align-items:flex-start;}
+  .rec-meta{font-weight:700; color:var(--ink); font-size:1.02rem;}
+  .rec-sub{color:var(--muted); font-size:0.9rem;}
+  .rec-actions button{margin-left:8px; border:0; background:transparent; cursor:pointer; color:var(--muted); font-size:1rem;}
+  .notes{margin-top:10px; display:flex; flex-direction:column; gap:8px;}
+  .note{background: transparent; border-left:4px solid var(--accent); padding:10px 12px; border-radius:8px; display:flex; justify-content:space-between; gap:8px; align-items:flex-start;}
+  .note .text{white-space:pre-wrap; color:var(--ink); font-size:0.95rem;}
+  .note .meta{color:var(--muted); font-size:0.82rem; margin-top:6px;}
+  .note-actions button{border:0;background:transparent;color:var(--muted);cursor:pointer;margin-left:8px;}
+  .add-note-row{display:flex; gap:8px; margin-top:8px; align-items:flex-start;}
+  textarea.note-input{width:100%; min-height:56px; resize:vertical; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; font-family:inherit; color:var(--ink);}
+  .btn-primary{padding:8px 12px; border-radius:8px; border:0; background:var(--start); color:#fff; cursor:pointer;}
+  .link-grey{color:var(--muted); text-decoration:none; font-size:0.95rem;}
+  .muted-small{color:var(--muted); font-size:0.85rem;}
+  .hidden{display:none !important;}
+  footer{margin-top:12px;text-align:center;color:var(--muted); font-size:0.85rem;}
+  .tag{display:inline-block; padding:4px 8px; border-radius:999px; font-size:0.8rem; margin-left:8px; color:var(--ink); border:1px solid rgba(0,0,0,0.03);}
+  .tag-input{width:160px; padding:8px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);}
+  .sort-btn{padding:8px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer;}
+  .pill{display:inline-flex; gap:8px; align-items:center; background:rgba(0,0,0,0.03); padding:6px 10px; border-radius:999px;}
+  /* tag filter bar */
+  .filter-bar{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center;}
+  .filter-btn{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; background:transparent; border:1px solid rgba(0,0,0,0.04); cursor:pointer; font-size:0.95rem; color:var(--ink);}
+  .filter-btn .dot{width:12px; height:12px; border-radius:50%; display:inline-block; box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+  .filter-btn.active{box-shadow:0 6px 14px rgba(75,46,22,0.12); border:1px solid var(--start);}
+  .filter-grid{display:grid; grid-template-columns: repeat(3, auto); gap:8px 14px; margin-top:8px;}
+  /* tag examples card */
+  .tag-examples{background:var(--example-bg-var); border:1px solid rgba(0,0,0,0.04); padding:12px; border-radius:10px; color:var(--ink); font-size:0.95rem; margin-top:14px;}
+  .swatch{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px; vertical-align:middle;}
+  .toggle-small{float:right; font-size:0.85rem; cursor:pointer; padding:6px 8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent;}
+  /* theme toggle */
+  .theme-toggle{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer;}
+  .theme-toggle .icon{font-size:1.05rem;}
+  .top-right-controls{display:flex; gap:8px; align-items:center;}
+  /* responsive tweaks */
+  @media (max-width:900px){
+    .wrap{grid-template-columns: 1fr; padding:18px;}
+    .left{order:2;}
+    .right{order:1;}
+  }
+</style>
+</head>
+<body data-theme="light">
+<div class="wrap" role="application">
+  <div class="left" aria-label="메뉴">
+    <h1>웹소설 노트</h1>
+    <div class="subtitle">개인용 플랫폼 — 회차 기록 · 메모 · 태그</div>
+
+    <div id="startArea" class="section">
+      <button id="startBtn" class="start-btn">시작하기</button>
+    </div>
+
+    <div id="passwordArea" class="section hidden" aria-hidden="true">
+      <div class="password-row">
+        <input id="passwordInput" type="password" placeholder="암호 입력 (기본: 1234)" />
+        <button id="passwordConfirm">확인</button>
+      </div>
+    </div>
+
+    <div id="menuArea" class="section hidden" aria-hidden="true">
+      <div class="small">소설 목록</div>
+      <div class="novel-list" id="novelList" role="list">
+        <!-- items injected -->
+      </div>
+      <div class="small muted-small" style="margin-top:12px;">작성자 입력은 메모/회차마다 입력됩니다.</div>
+    </div>
+
+    <div class="section" style="margin-top:18px;">
+      <div class="small">설정</div>
+      <div class="small muted-small" style="margin-top:8px;">데이터는 이 브라우저의 저장소(localStorage)에 보관됩니다.</div>
+      <div style="margin-top:8px;"><a class="link-grey" href="#" id="resetAll">모든 데이터 초기화</a></div>
+    </div>
+  </div>
+
+  <div class="right" aria-live="polite">
+    <div id="welcomeCard" class="card">
+      <div class="top-row">
+        <div>
+          <div class="tiny">선택된 소설</div>
+          <h2 id="novelTitle" style="margin:6px 0 0;">(목록에서 소설을 선택하세요)</h2>
+          <div id="novelHint" class="muted-small" style="margin-top:6px;">회차 입력 → 자동으로 시간과 작성자가 기록됩니다.</div>
+        </div>
+        <div class="top-right-controls">
+          <div class="pill">
+            <button id="sortBtn" class="sort-btn" title="정렬 전환">최신순 ▼</button>
+          </div>
+          <div class="theme-toggle" id="themeToggle" title="테마 전환 (낮/밤)">
+            <span class="icon">☀️</span>
+            <span class="label tiny">낮</span>
+          </div>
+          <a href="#" id="backToMenu" class="link-grey hidden">← 목록으로</a>
+        </div>
+      </div>
+
+      <!-- FILTERS: placed above inputs -->
+      <div id="filterArea" style="margin-top:12px;">
+        <div class="filter-bar" id="filterBarTop"></div>
+        <div class="filter-grid" id="filterGrid"></div>
+      </div>
+
+      <div style="margin-top:8px; display:flex; gap:10px; align-items:center;">
+        <input id="chapterInput" type="number" placeholder="회차 (숫자)" class="inline-edit" />
+        <input id="authorInput" type="text" placeholder="작성자 이름" class="inline-edit author" />
+        <input id="tagInput" type="text" placeholder="태그 (자유입력, 콤마로 구분)" class="tag-input" />
+        <button id="saveRecord" class="btn-primary">기록 추가</button>
+      </div>
+
+      <!-- tag examples card -->
+      <div class="tag-examples" id="tagExamples">
+        <button id="toggleColorNames" class="toggle-small">색상명 표시: OFF</button>
+        <strong>태그 예시</strong>
+        <div style="margin-top:8px; display:grid; grid-template-columns:repeat(2,1fr); gap:6px 12px;" id="exampleGrid">
+          <div><span class="swatch" style="background:#e7b4b4"></span>중요</div>
+          <div><span class="swatch" style="background:#f3d4a0"></span>아이디어</div>
+          <div><span class="swatch" style="background:#a8c6ea"></span>감상</div>
+          <div><span class="swatch" style="background:#c5c5c5"></span>스포일러</div>
+          <div><span class="swatch" style="background:#b7e1df"></span>추측</div>
+          <div><span class="swatch" style="background:#b7d4b2"></span>기타</div>
+        </div>
+      </div>
+
+      <div id="resultList" class="result-list" aria-live="polite"></div>
+
+      <footer>노트 느낌 · 고급스러운 플랫폼 스타일</footer>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======= data & settings ======= */
+const NOVELS = [
+  { id: "독자", title: "전지적 독자 시점" },
+  { id: "데뷔", title: "데뷔 못하면 죽는 병 걸림" },
+  { id: "괴담", title: "괴담에 떨어져도 출근을 해야 하는구나" }
+];
+const STORAGE_KEY = "webnovel_notes_vUltimate";
+const TAG_COLOR_KEY = "webnovel_tag_colors_vUltimate";
+const FILTER_KEY = "webnovel_filter_vUltimate";
+const THEME_KEY = "webnovel_theme_vUltimate";
+const COLORNAME_KEY = "webnovel_colornames_vUltimate";
+
+let state = {
+  unlocked: false,
+  currentNovelId: null,
+  sortNewestFirst: true,
+  data: {}  // novelId: [records]
+};
+
+const FIXED_TAGS = {
+  "중요":"#e7b4b4",
+  "아이디어":"#f3d4a0",
+  "감상":"#a8c6ea",
+  "스포일러":"#c5c5c5",
+  "추측":"#b7e1df",
+  "기타":"#b7d4b2"
+};
+
+let tagColorMap = Object.assign({}, FIXED_TAGS);
+let activeFilter = localStorage.getItem(FILTER_KEY) || "전체";
+let activeTheme = localStorage.getItem(THEME_KEY) || "light";
+let showColorNames = (localStorage.getItem(COLORNAME_KEY) || "off") === "on";
+
+/* utils */
+function uid(prefix='id'){ return prefix+'_'+Math.random().toString(36).slice(2,9); }
+function nowFormatted(){ const d=new Date(); const Y=d.getFullYear(); const M=String(d.getMonth()+1).padStart(2,'0'); const D=String(d.getDate()).padStart(2,'0'); const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${Y}-${M}-${D} ${hh}:${mm}`; }
+function saveToStorage(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); localStorage.setItem(TAG_COLOR_KEY, JSON.stringify(tagColorMap)); localStorage.setItem(FILTER_KEY, activeFilter); localStorage.setItem(THEME_KEY, activeTheme); localStorage.setItem(COLORNAME_KEY, showColorNames ? "on":"off"); }
+function loadFromStorage(){ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ try{ state.data = JSON.parse(raw); }catch(e){ state.data={}; } } const tc = localStorage.getItem(TAG_COLOR_KEY); if(tc){ try{ tagColorMap = JSON.parse(tc); }catch(e){ tagColorMap = Object.assign({}, FIXED_TAGS); } } activeFilter = localStorage.getItem(FILTER_KEY) || "전체"; activeTheme = localStorage.getItem(THEME_KEY) || "light"; showColorNames = (localStorage.getItem(COLORNAME_KEY) || "off") === "on"; }
+
+function ensureNovelArray(id){ if(!state.data[id]) state.data[id]=[]; return state.data[id]; }
+
+function pastelForTag(tag){
+  if(tagColorMap[tag]) return tagColorMap[tag];
+  const h = Math.floor(Math.random()*360);
+  const s = 45 + Math.floor(Math.random()*20);
+  const l = 72 + Math.floor(Math.random()*10);
+  const color = `hsl(${h} ${s}% ${l}%)`;
+  tagColorMap[tag] = color;
+  saveToStorage();
+  return color;
+}
+
+/* UI elements */
+const novelListEl = document.getElementById('novelList');
+const startBtn = document.getElementById('startBtn');
+const passwordArea = document.getElementById('passwordArea');
+const menuArea = document.getElementById('menuArea');
+const passwordConfirm = document.getElementById('passwordConfirm');
+const passwordInput = document.getElementById('passwordInput');
+const backToMenu = document.getElementById('backToMenu');
+const novelTitle = document.getElementById('novelTitle');
+const resultList = document.getElementById('resultList');
+const chapterInput = document.getElementById('chapterInput');
+const authorInput = document.getElementById('authorInput');
+const tagInput = document.getElementById('tagInput');
+const saveRecord = document.getElementById('saveRecord');
+const resetAll = document.getElementById('resetAll');
+const sortBtn = document.getElementById('sortBtn');
+const filterBarTop = document.getElementById('filterBarTop');
+const filterGrid = document.getElementById('filterGrid');
+const themeToggle = document.getElementById('themeToggle');
+const toggleColorNames = document.getElementById('toggleColorNames');
+const tagExamples = document.getElementById('tagExamples');
+
+/* render menu */
+function renderMenu(){
+  novelListEl.innerHTML='';
+  NOVELS.forEach(n=>{
+    const el = document.createElement('div'); el.className='novel-item'; el.setAttribute('role','button');
+    el.textContent = n.title;
+    const count = (state.data[n.id] && state.data[n.id].length) || 0;
+    const meta = document.createElement('div'); meta.className='small muted-small'; meta.textContent = `${count}개 기록`;
+    el.appendChild(meta);
+    el.onclick = ()=> openNovel(n.id);
+    novelListEl.appendChild(el);
+  });
+}
+
+/* start flow */
+startBtn.addEventListener('click', ()=>{ startBtn.classList.add('hidden'); passwordArea.classList.remove('hidden'); });
+passwordConfirm.addEventListener('click', ()=>{
+  const pw = passwordInput.value || "";
+  if(pw === "1234"){
+    state.unlocked=true; passwordArea.classList.add('hidden'); menuArea.classList.remove('hidden'); loadFromStorage(); applyTheme(); renderMenu(); renderFilterButtons();
+  } else { alert('암호가 틀렸습니다. (기본: 1234)'); }
+});
+backToMenu.addEventListener('click',(e)=>{ e.preventDefault(); closeNovel(); });
+
+resetAll.addEventListener('click',(e)=>{ e.preventDefault(); if(confirm('정말로 모든 저장 데이터를 삭제할까요?')){ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(TAG_COLOR_KEY); localStorage.removeItem(FILTER_KEY); localStorage.removeItem(THEME_KEY); localStorage.removeItem(COLORNAME_KEY); state.data={}; tagColorMap = Object.assign({}, FIXED_TAGS); activeFilter="전체"; activeTheme="light"; showColorNames=false; resultList.innerHTML=''; renderMenu(); renderFilterButtons(); applyTheme(); alert('초기화되었습니다.'); } });
+
+/* open/close novel */
+function openNovel(id){
+  state.currentNovelId = id;
+  const meta = NOVELS.find(n=>n.id===id); novelTitle.textContent = meta ? meta.title : id;
+  document.getElementById('menuArea').classList.add('hidden'); document.getElementById('backToMenu').classList.remove('hidden');
+  chapterInput.value=''; authorInput.value=''; tagInput.value='';
+  renderRecords();
+  renderFilterButtons();
+  applyTheme();
+}
+
+function closeNovel(){ state.currentNovelId=null; novelTitle.textContent="(목록에서 소설을 선택하세요)"; document.getElementById('menuArea').classList.remove('hidden'); document.getElementById('backToMenu').classList.add('hidden'); resultList.innerHTML=''; renderMenu(); renderFilterButtons(); applyTheme(); }
+
+/* add record */
+saveRecord.addEventListener('click', ()=>{
+  if(!state.currentNovelId){ alert('먼저 소설을 선택하세요'); return; }
+  const chapter = chapterInput.value && String(chapterInput.value).trim();
+  const author = authorInput.value && String(authorInput.value).trim();
+  const tagRaw = tagInput.value && String(tagInput.value).trim();
+  if(!chapter){ alert('회차를 입력해주세요'); return; }
+  if(!author){ alert('작성자 이름을 입력해주세요'); return; }
+  const tags = tagRaw ? tagRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  const rec = { id: uid('rec'), chapter: chapter, author: author, datetime: nowFormatted(), notes: [], tags: tags };
+  ensureNovelArray(state.currentNovelId).unshift(rec);
+  saveToStorage();
+  renderRecords(); renderMenu(); chapterInput.value=''; tagInput.value='';
+});
+
+/* render filter buttons */
+function renderFilterButtons(){
+  // collect all tags used across current novel + fixed tags
+  const usedTags = new Set(Object.keys(FIXED_TAGS));
+  if(state.currentNovelId && state.data[state.currentNovelId]){
+    state.data[state.currentNovelId].forEach(r=>{
+      if(r.tags) r.tags.forEach(t=>usedTags.add(t));
+      if(r.notes) r.notes.forEach(n=>{ if(n.tags) n.tags.forEach(t=>usedTags.add(t)); });
+    });
+  }
+  const tagsArr = Array.from(usedTags);
+  // top bar: 전체 only
+  filterBarTop.innerHTML='';
+  const allBtn = document.createElement('button'); allBtn.className='filter-btn'; allBtn.innerHTML = `<span class="dot" style="background:#ddd"></span> 전체`;
+  allBtn.onclick = ()=> setFilter('전체'); if(activeFilter==='전체') allBtn.classList.add('active');
+  filterBarTop.appendChild(allBtn);
+  // grid: show other tags in two-row grid
+  filterGrid.innerHTML='';
+  // ensure fixed tags order first
+  const ordered = ['중요','아이디어','감상','스포일러','추측','기타'];
+  const remaining = tagsArr.filter(t=>!ordered.includes(t)).sort();
+  const finalList = ordered.concat(remaining);
+  finalList.forEach(t=>{
+    const btn = document.createElement('button'); btn.className='filter-btn';
+    const color = pastelForTag(t);
+    btn.innerHTML = `<span class="dot" style="background:${color}"></span> ${t}`;
+    btn.onclick = ()=> setFilter(t);
+    if(activeFilter===t) btn.classList.add('active');
+    filterGrid.appendChild(btn);
+  });
+}
+
+/* set filter */
+function setFilter(tag){
+  activeFilter = tag || "전체";
+  saveToStorage();
+  renderFilterButtons();
+  renderRecords();
+}
+
+/* render records with filter */
+function renderRecords(){
+  const list = ensureNovelArray(state.currentNovelId);
+  if(!list.length){ resultList.innerHTML = '<div class="muted-small">아직 기록이 없습니다. 회차를 추가해보세요.</div>'; return; }
+  const toShow = list.slice().sort((a,b)=> state.sortNewestFirst ? (new Date(b.datetime) - new Date(a.datetime)) : (new Date(a.datetime) - new Date(b.datetime)));
+  resultList.innerHTML='';
+  toShow.forEach(rec=>{
+    // determine if this record should be shown based on activeFilter
+    let recMatches = false;
+    if(activeFilter === "전체") recMatches = true;
+    else {
+      // check record-level tags
+      if(rec.tags && rec.tags.includes(activeFilter)) recMatches = true;
+      // check if any note has the tag
+      if(!recMatches && rec.notes){
+        for(const n of rec.notes){ if(n.tags && n.tags.includes(activeFilter)){ recMatches = true; break; } }
+      }
+    }
+    if(!recMatches) return; // skip entire record
+    const node = document.createElement('div'); node.className='record'; node.dataset.recId = rec.id;
+    const top = document.createElement('div'); top.className='rec-top';
+    const left = document.createElement('div'); left.className='rec-left';
+    const meta = document.createElement('div'); meta.className='rec-meta'; meta.textContent = `${rec.chapter}화 · ${rec.datetime}`;
+    const sub = document.createElement('div'); sub.className='rec-sub'; sub.textContent = `by ${rec.author}`;
+    const tagWrap = document.createElement('div'); tagWrap.style.marginTop='6px';
+    if(rec.tags && rec.tags.length){
+      rec.tags.forEach(t=>{
+        const span = document.createElement('span'); span.className='tag'; span.textContent = t; span.style.background = pastelForTag(t);
+        tagWrap.appendChild(span);
+      });
+    }
+    left.appendChild(meta); left.appendChild(sub); left.appendChild(tagWrap);
+    top.appendChild(left);
+    const actions = document.createElement('div'); actions.className='rec-actions';
+    const editBtn = document.createElement('button'); editBtn.title='수정'; editBtn.innerHTML='✏️'; editBtn.onclick = ()=> openEditRecord(rec.id);
+    const delBtn = document.createElement('button'); delBtn.title='삭제'; delBtn.innerHTML='🗑️'; delBtn.onclick = ()=> { if(confirm('이 기록을 삭제할까요?')) deleteRecord(rec.id); };
+    actions.appendChild(editBtn); actions.appendChild(delBtn);
+    top.appendChild(actions);
+    node.appendChild(top);
+
+    // notes list: show only notes matching filter (or all if 전체)
+    const notesWrap = document.createElement('div'); notesWrap.className='notes';
+    const notesToShow = (rec.notes||[]).filter(n => {
+      if(activeFilter === "전체") return true;
+      if(n.tags && n.tags.includes(activeFilter)) return true;
+      return false;
+    });
+    if(notesToShow && notesToShow.length){
+      notesToShow.forEach(n=>{
+        const noteEl = document.createElement('div'); noteEl.className='note';
+        const leftNote = document.createElement('div'); leftNote.style.flex='1';
+        const noteText = document.createElement('div'); noteText.className='text'; noteText.textContent = n.text;
+        const noteMeta = document.createElement('div'); noteMeta.className='meta'; noteMeta.textContent = `${n.datetime} · by ${n.author}`;
+        leftNote.appendChild(noteText);
+        // note tags
+        if(n.tags && n.tags.length){
+          const noteTagRow = document.createElement('div'); noteTagRow.style.marginTop='6px';
+          n.tags.forEach(t=>{
+            const s = document.createElement('span'); s.className='tag'; s.textContent = t; s.style.background = pastelForTag(t);
+            noteTagRow.appendChild(s);
+          });
+          leftNote.appendChild(noteTagRow);
+        }
+        leftNote.appendChild(noteMeta);
+        const rightNote = document.createElement('div'); rightNote.className='note-actions';
+        const noteEdit = document.createElement('button'); noteEdit.innerHTML='✏️'; noteEdit.title='메모 수정'; noteEdit.onclick = ()=> openEditNote(rec.id, n.id);
+        const noteDel = document.createElement('button'); noteDel.innerHTML='🗑️'; noteDel.title='메모 삭제'; noteDel.onclick = ()=> { if(confirm('메모를 삭제할까요?')) deleteNote(rec.id, n.id); };
+        rightNote.appendChild(noteEdit); rightNote.appendChild(noteDel);
+        noteEl.appendChild(leftNote); noteEl.appendChild(rightNote);
+        notesWrap.appendChild(noteEl);
+      });
+    }
+
+    // add note UI
+    const addNoteRow = document.createElement('div'); addNoteRow.className='add-note-row';
+    const ta = document.createElement('textarea'); ta.className='note-input'; ta.placeholder='메모를 추가하세요...';
+    const tagField = document.createElement('input'); tagField.type='text'; tagField.placeholder='태그 (콤마로 구분)'; tagField.className='tag-input';
+    tagField.style.width='200px';
+    const addBtn = document.createElement('button'); addBtn.className='btn-primary'; addBtn.textContent='메모 추가';
+    addBtn.onclick = ()=> {
+      const text = ta.value && ta.value.trim();
+      const author = prompt('작성자 이름을 입력하세요', '') || '';
+      const tagRaw = tagField.value && tagField.value.trim();
+      const tags = tagRaw ? tagRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+      if(!text){ alert('메모 내용을 입력하세요'); return; }
+      if(!author){ alert('작성자 이름은 필수입니다'); return; }
+      addNote(rec.id, { id: uid('note'), text: text, author: author, datetime: nowFormatted(), tags: tags });
+      ta.value=''; tagField.value=''; renderRecords();
+    };
+    addNoteRow.appendChild(ta); addNoteRow.appendChild(tagField); addNoteRow.appendChild(addBtn);
+
+    node.appendChild(notesWrap);
+    node.appendChild(addNoteRow);
+
+    resultList.appendChild(node);
+  });
+}
+
+/* CRUD record */
+function findRecordById(recId){ const list = ensureNovelArray(state.currentNovelId); return list.find(r=>r.id===recId); }
+function deleteRecord(recId){ const list = ensureNovelArray(state.currentNovelId); state.data[state.currentNovelId] = list.filter(r=>r.id!==recId); saveToStorage(); renderRecords(); renderMenu(); }
+function openEditRecord(recId){
+  const rec = findRecordById(recId); if(!rec) return;
+  const newChap = prompt('회차를 수정하세요', rec.chapter); if(newChap === null) return;
+  const newAuthor = prompt('작성자 이름을 수정하세요', rec.author); if(newAuthor === null) return;
+  const newTags = prompt('기록 태그(콤마 구분)', rec.tags ? rec.tags.join(', ') : '') || '';
+  rec.chapter = String(newChap).trim() || rec.chapter;
+  rec.author = String(newAuthor).trim() || rec.author;
+  rec.tags = newTags.split(',').map(t=>t.trim()).filter(Boolean);
+  rec.datetime = nowFormatted(); saveToStorage(); renderRecords(); renderMenu();
+}
+
+/* notes CRUD */
+function addNote(recId, note){ const rec = findRecordById(recId); if(!rec) return; rec.notes = rec.notes || []; rec.notes.unshift(note); saveToStorage(); }
+function deleteNote(recId, noteId){ const rec = findRecordById(recId); if(!rec) return; rec.notes = rec.notes.filter(n=>n.id!==noteId); saveToStorage(); renderRecords(); }
+function openEditNote(recId, noteId){
+  const rec = findRecordById(recId); if(!rec) return; const note = rec.notes.find(n=>n.id===noteId); if(!note) return;
+  const newText = prompt('메모 내용을 수정하세요', note.text); if(newText === null) return;
+  const newAuthor = prompt('작성자 이름을 수정하세요', note.author); if(newAuthor === null) return;
+  const newTags = prompt('메모 태그(콤마 구분)', note.tags ? note.tags.join(', ') : '') || '';
+  note.text = String(newText).trim() || note.text;
+  note.author = String(newAuthor).trim() || note.author;
+  note.tags = newTags.split(',').map(t=>t.trim()).filter(Boolean);
+  note.datetime = nowFormatted();
+  saveToStorage();
+  renderRecords();
+}
+
+/* sort toggle */
+sortBtn.addEventListener('click', ()=>{
+  state.sortNewestFirst = !state.sortNewestFirst;
+  sortBtn.textContent = state.sortNewestFirst ? '최신순 ▼' : '오래된순 ▲';
+  renderRecords();
+});
+
+/* theme toggle */
+function applyTheme(){
+  document.body.setAttribute('data-theme', activeTheme);
+  const icon = themeToggle.querySelector('.icon');
+  const label = themeToggle.querySelector('.label');
+  if(activeTheme === 'dark'){ icon.textContent = '🌙'; label.textContent='밤'; }
+  else { icon.textContent = '☀️'; label.textContent='낮'; }
+  // update font via CSS (body data-theme handles font-family)
+  saveToStorage();
+}
+
+/* theme click handler */
+themeToggle.addEventListener('click', ()=>{
+  activeTheme = (activeTheme === 'light') ? 'dark' : 'light';
+  applyTheme();
+  renderFilterButtons();
+  renderRecords();
+});
+
+/* color name toggle */
+toggleColorNames.addEventListener('click', ()=>{
+  showColorNames = !showColorNames;
+  toggleColorNames.textContent = `색상명 표시: ${showColorNames ? "ON":"OFF"}`;
+  saveToStorage();
+  renderExampleGrid();
+});
+function renderExampleGrid(){
+  const grid = document.getElementById('exampleGrid');
+  grid.innerHTML='';
+  const items = Object.entries(FIXED_TAGS);
+  items.forEach(([k,v])=>{
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="swatch" style="background:${v}"></span>${k}${showColorNames ? ' ('+colorNameForHex(v)+')' : ''}`;
+    grid.appendChild(div);
+  });
+}
+function colorNameForHex(hex){
+  // simple mapping for our fixed set
+  const map = {
+    "#e7b4b4":"로즈핑크",
+    "#f3d4a0":"크림옐로우",
+    "#a8c6ea":"파스텔블루",
+    "#c5c5c5":"웜그레이",
+    "#b7e1df":"민트시안",
+    "#b7d4b2":"파스텔그린"
+  };
+  return map[hex] || hex;
+}
+
+/* initial load */
+loadFromStorage();
+applyTheme();
+renderMenu();
+renderFilterButtons();
+renderExampleGrid();
+
+</script>
+</body>
+</html>
